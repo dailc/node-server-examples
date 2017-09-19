@@ -4,7 +4,9 @@ const express = require('express');
 
 const app = express();
 // 创建 application/x-www-form-urlencoded 编码解析
-const urlencodedParser = bodyParser.urlencoded({ extended: false });
+const urlencodedParser = bodyParser.urlencoded({
+    extended: false
+});
 
 function resolvePath(p) {
     return path.resolve(__dirname, '../', p);
@@ -19,7 +21,6 @@ app.all('*', (req, res, next) => {
     res.header('Access-Control-Allow-Headers', 'X-Requested-With');
     res.header('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS');
     res.header('X-Powered-By', ' 3.2.1');
-    res.header('Content-Type', 'application/json;charset=utf-8');
     if (req.method === 'OPTIONS') {
         console.log('OPTIONS请求');
         // 让options请求快速返回
@@ -27,6 +28,11 @@ app.all('*', (req, res, next) => {
         res.sendStatus(200);
     } else {
         console.log(`请求:${req.method}`);
+        if (req.method === 'GET') {
+            res.header('Content-Type', 'text/html');
+        } else {
+            res.header('Content-Type', 'application/json;charset=utf-8');
+        }
         next();
     }
 });
@@ -38,7 +44,7 @@ app.get('/', (req, res) => {
 app.post('/test', urlencodedParser, (req, res) => {
     // 输出 JSON 格式
     console.log(req.body);
-   
+
     res.end(JSON.stringify({
         hello: 'world!',
     }));
