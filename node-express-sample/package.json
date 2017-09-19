@@ -1,0 +1,32 @@
+{
+  "name": "node-express-sample",
+  "version": "1.0.0",
+  "description": "node.js的express示例",
+  "main": "index.js",
+  "scripts": {
+    "server": "node ./src/server.js",
+    "dev": "npm run lint && npm run watch",
+    "lint": "node_modules/.bin/gulp lint",
+    "watch": "node_modules/.bin/gulp watch",
+    "test:eslint": "npm run eslint:report",
+    "eslint": "node_modules/.bin/eslint ./src ./test ./build",
+    "eslint:fix": "node_modules/.bin/eslint ./src ./test ./build --fix",
+    "eslint:report": "node_modules/.bin/eslint ./src ./test ./build -f html -o ./_report/eslint.html"
+  },
+  "author": "dailc",
+  "license": "MIT",
+  "dependencies": {
+    "babel-eslint": "^8.0.0",
+    "body-parser": "^1.18.1",
+    "eslint": "^4.7.1",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.3.0",
+    "express": "^4.15.4",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^4.0.0",
+    "npm": "^5.4.2",
+    "run": "^1.4.0"
+  }
+}
