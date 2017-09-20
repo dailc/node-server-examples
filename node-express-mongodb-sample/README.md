@@ -43,6 +43,9 @@ show dbs
 // 查看当前连接的库
 db
 
+// 使用某个库
+use xxdb
+
 // 显示库中有哪些集合
 show collections
 
