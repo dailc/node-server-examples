@@ -4,7 +4,8 @@
   "description": "node.js的express示例",
   "main": "index.js",
   "scripts": {
-    "serve": "node ./src/start.js",
+    "start": "node ./src/start.js",
+    "serve": "node_modules/.bin/supervisor ./src/start.js",
     "dev": "npm run lint && npm run watch",
     "lint": "node_modules/.bin/gulp lint",
     "watch": "node_modules/.bin/gulp watch",
@@ -29,6 +30,7 @@
     "gulp-eslint": "^4.0.0",
     "mongoose": "^4.11.12",
     "npm": "^5.4.2",
-    "run": "^1.4.0"
+    "run": "^1.4.0",
+    "supervisor": "^0.12.0"
   }
 }

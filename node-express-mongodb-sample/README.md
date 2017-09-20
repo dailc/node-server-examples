@@ -12,6 +12,8 @@ node.js的express + mongodb示例
 
 - 代码划分模块
 
+- supervisor自动监听修改
+
 - 新增一个接口可以mongodb数据存储（需要本地先安装）
 
 - mongoose操作mongodb
