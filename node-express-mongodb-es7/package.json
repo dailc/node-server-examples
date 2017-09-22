@@ -1,0 +1,43 @@
+{
+  "name": "node-express-sample",
+  "version": "1.0.0",
+  "description": "使用es7+gulp+babel写node.js示例",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./dest/start.js",
+    "serve": "node_modules/.bin/supervisor ./dest/start.js",
+    "dev": "npm run build && npm run watch",
+    "build": "node_modules/.bin/gulp default",
+    "watch": "node_modules/.bin/gulp watch",
+    "test:db": "node ./src/db/helloMongodb.js",
+    "test:eslint": "npm run eslint:report",
+    "eslint": "node_modules/.bin/eslint ./src ./test ./build",
+    "eslint:fix": "node_modules/.bin/eslint ./src ./test ./build --fix",
+    "eslint:report": "node_modules/.bin/eslint ./src ./test ./build -f html -o ./_report/eslint.html"
+  },
+  "author": "dailc",
+  "license": "MIT",
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.0.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-runtime": "^6.26.0",
+    "body-parser": "^1.18.1",
+    "eslint": "^4.7.1",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.3.0",
+    "express": "^4.15.4",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.0",
+    "gulp-eslint": "^4.0.0",
+    "gulp-sourcemaps": "^2.6.1",
+    "mongoose": "^4.11.12",
+    "npm": "^5.4.2",
+    "run": "^1.4.0",
+    "supervisor": "^0.12.0"
+  }
+}
