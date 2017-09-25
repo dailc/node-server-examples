@@ -27,6 +27,11 @@
                     headers: {
                         Accept: '*/*',
                     },
+                    // 需要服务端开启cookie相应的cors
+                    xhrFields: {
+                        // 跨域带cookie
+                        withCredentials: true
+                    },
                     success: function(response) {
                         console.log("success:" + JSON.stringify(response));
                         alert('成功:' + JSON.stringify(response));
