@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <title>socketclient</title>
+        <style>
+            .btn-block {
+                margin: 5px;
+                padding: 5px;
+                border: 1px solid #000;
+            }
+            
+            .container-input {
+                border: 1px solid #000;
+            }
+            
+            .input-block {
+                margin: 5px;
+                padding: 5px;
+            }
+            
+            .groupchat {
+                width: 100%;
+                min-height: 100px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container-input">
+            <div class="input-block">
+                <label for="nickname">昵称</label> <input type="text" value="撒网要见鱼" id="nickname" />
+            </div>
+        </div>
+        <div class="btn-block">
+            <button id="btn_connect">连接</button>
+            <button id="btn_disconnect">断开连接</button>
+        </div>
+        
+        <div class="container-input">
+            <textarea id="groupchat" class="groupchat"></textarea>
+        </div>
+        <div class="btn-block">
+            <button id="btn_send">发送群聊消息</button>
+        </div>
+        
+        <div id="tips"></div>
+
+        <script type="text/javascript" src="socket.io.js"></script>
+        <script>
+            var socket;
+            var tipsDom;
+            var nickNameDom;
+            var groupChatDom;
+            
+            function init() {
+                tipsDom = document.getElementById('tips');
+                nickNameDom = document.getElementById('nickname');
+                groupChatDom = document.getElementById('groupchat');
+                initListeners();
+            }
+            
+            function initListeners() {
+                document.getElementById('btn_connect').addEventListener('click', function() {
+                    if (!nickNameDom.value) {
+                        tips('请输入昵称');
+                        return;
+                    }
+                    !socket && connectSocket();
+                });
+                
+                document.getElementById('btn_disconnect').addEventListener('click', function() {
+                    closeSocket();
+                });
+                
+                document.getElementById('btn_send').addEventListener('click', function() {
+                    var message = groupChatDom.value;
+                    
+                    socket.emit('group chat message server', message);
+                    
+                    // 自己的群聊必须手动加
+                    showMessage('手动发出群聊信息：' + message);
+                });
+            }
+            
+            function connectSocket() {
+                socket = io.connect('http://localhost:8100');
+
+                socket.on('open', function(data) {
+                    showMessage('已经连接到服务器，连接时间：' + data.time);
+                    login(nickNameDom.value);
+                });
+
+                socket.on('group chat message client', function(message) {
+                    showMessage('接受到群聊信息：' + message);
+                });
+                
+                socket.on('broadcast', function(message) {
+                    // 系统广播
+                    showMessage('系统广播：' + message);
+                });
+
+                socket.on('disconnect', () => {
+                    // 失联
+                    socket = undefined;
+                    showMessage('和服务端失去联系');
+                });
+            }
+            
+            function login(nickName) {
+                // 登陆，如果不符合要求需要提示错误
+                socket.emit('login', nickName, function(data) {
+                    if (data.code) {
+                        showMessage(nickName + '登陆成功，' + data.message);
+                    } else {
+                        showMessage(nickName + '登陆失败：' + data.message);
+                        closeSocket();
+                    }
+                });
+            }
+            
+            function closeSocket() {
+                socket && socket.close();
+                // socket.disconnect();
+            }
+            
+            function showMessage(msg, isClear) {
+                var html = '<li>' + msg + '</li>';
+                
+                if (isClear) {
+                    tipsDom.innerHTML = html;
+                } else {
+                    tipsDom.innerHTML += html;
+                }
+                
+                console.log(msg);
+            }
+            
+            function tips(msg) {
+                alert(msg);
+            }
+            
+            init();
+        </script>
+    </body>
+
+</html>
