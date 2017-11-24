@@ -43,6 +43,10 @@
         </div>
         <div class="btn-block">
             <button id="btn_send">发送群聊消息</button>
+            <button id="btn_send_private">发送私聊消息</button>
+            <div class="input-block">
+                <label for="privatechattername">私聊对象</label> <input type="text" value="撒网要见鱼" id="privatechattername" />
+            </div>
         </div>
         
         <div id="tips"></div>
@@ -53,11 +57,13 @@
             var tipsDom;
             var nickNameDom;
             var groupChatDom;
+            var privateChatterNameDom;
             
             function init() {
                 tipsDom = document.getElementById('tips');
                 nickNameDom = document.getElementById('nickname');
                 groupChatDom = document.getElementById('groupchat');
+                privateChatterNameDom = document.getElementById('privatechattername');
                 initListeners();
             }
             
@@ -78,9 +84,27 @@
                     var message = groupChatDom.value;
                     
                     socket.emit('group chat message server', message);
+                });
+                
+                document.getElementById('btn_send_private').addEventListener('click', function() {
+                    if (!privateChatterNameDom.value) {
+                        tips('请输入私聊昵称');
+                        return;
+                    }
                     
-                    // 自己的群聊必须手动加
-                    showMessage('手动发出群聊信息：' + message);
+                    var message = groupChatDom.value;
+                    var privateChatter = privateChatterNameDom.value;
+                    
+                    socket.emit('private chat message server', {
+                        message,
+                        receiver: privateChatter, 
+                    }, function(data) {
+                        if (data.code) {
+                            showMessage('向' + privateChatter + '发出私聊信息：' + message);
+                        } else {
+                            showMessage('向' + privateChatter + '发出私聊信息失败：' + data.message);
+                        }
+                    });
                 });
             }
             
@@ -92,8 +116,12 @@
                     login(nickNameDom.value);
                 });
 
-                socket.on('group chat message client', function(message) {
-                    showMessage('接受到群聊信息：' + message);
+                socket.on('group chat message client', function(data) {
+                    showMessage(data.sender + '发出群聊信息：' + data.message);
+                });
+                
+                socket.on('private chat message client', function(data) {
+                    showMessage(data.sender + '向你发出私聊信息：' + data.message);
                 });
                 
                 socket.on('broadcast', function(message) {

@@ -38,6 +38,7 @@ function serverMixmin(app) {
         (0, _debug.log)(`应用实例，访问地址为 http://${host}:${port}`);
     });
 
+    // socket无须考虑跨域
     (0, _ioserver2.default)(io);
 }
 //# sourceMappingURL=server.js.map

@@ -16,7 +16,7 @@ export default function ioserverMixmin(io) {
         socket.broadcast.emit('broadcast', message);
     }
 
-    function getHashByNickName(nickName) {
+    function encodeNickName(nickName) {
         return encodeURIComponent(nickName);
     }
     
@@ -34,8 +34,9 @@ export default function ioserverMixmin(io) {
 
         socket.on('login', (nickName, fn) => {
             const res = {};
+            const name = encodeNickName(nickName);
 
-            if (usersOnline[getHashByNickName(nickName)]) {
+            if (usersOnline[name]) {
                 res.code = 0;
                 res.message = '昵称重复';
 
@@ -43,13 +44,15 @@ export default function ioserverMixmin(io) {
 
                 return;
             }
-            const name = getHashByNickName(nickName);
+            
             const client = {
                 name,
                 socket,
             };
-
-            socket.name = name;
+            
+            const assignSocket = socket;
+            
+            assignSocket.name = name;
             usersOnline[name] = client;
             userCountOnline++;
             log(`${nickName}登陆`);
@@ -65,7 +68,45 @@ export default function ioserverMixmin(io) {
         socket.on('group chat message server', (message) => {
             log(`一个群聊信息:${message}`);
             
-            socket.broadcast.emit('group chat message client', message);
+            const name = socket.name;
+            
+            // 发送给自己的消息
+            socket.emit('group chat message client', {
+                message,
+                sender: decodeNickName(name),
+            });
+            
+            socket.broadcast.emit('group chat message client', {
+                message,
+                sender: decodeNickName(name),
+            });
+        });
+        
+        socket.on('private chat message server', (data, fn) => {
+            log(`一个私聊信息:${JSON.stringify(data)}`);
+            
+            const receiver = encodeNickName(data.receiver);
+            const name = socket.name;
+            const res = {};
+            
+            if (usersOnline[receiver]) {
+                const targetSocket = usersOnline[receiver].socket;
+                
+                // 发送给私聊对象
+                targetSocket.emit('private chat message client', {
+                    message: data.message,
+                    sender: decodeNickName(name),
+                });
+                
+                res.code = 1;
+                res.message = '私聊成功';
+                fn(res);
+            } else {
+                // 私聊对象不存在
+                res.code = 0;
+                res.message = '私聊对象未上线';
+                fn(res);
+            }
         });
 
         socket.on('disconnect', () => {

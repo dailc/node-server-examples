@@ -22,5 +22,6 @@ export default function serverMixmin(app) {
         log(`应用实例，访问地址为 http://${host}:${port}`);
     });
     
+    // socket无须考虑跨域
     ioserverMixmin(io);
 }
