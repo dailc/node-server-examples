@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <title>socketroom</title>
+        <style>
+            .btn-block {
+                margin: 5px;
+                padding: 5px;
+                border: 1px solid #000;
+            }
+            
+            .container-input {
+                border: 1px solid #000;
+            }
+            
+            .input-block {
+                margin: 5px;
+                padding: 5px;
+            }
+            
+            .dispatchdata {
+                width: 100%;
+                min-height: 100px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="btn-block">
+            <button id="btn_connect">连接</button>
+            <button id="btn_disconnect">断开连接</button>
+        </div>
+        
+        <div class="container-input">
+            <textarea id="dispatchdata" class="dispatchdata"></textarea>
+        </div>
+        <div class="btn-block">
+            <button id="btn_dispatch">分发数据</button>
+        </div>
+        
+        <div id="tips"></div>
+
+        <script type="text/javascript" src="socket.io.js"></script>
+        <script type="text/javascript" src="common.js" ></script>
+        <script>
+            var socket;
+            var tipsDom;
+            var disPatchdataDom;
+            var roomId = Util.getExtraDataByKey('roomid') || Util.uuid();
+            
+            function init() {
+                tipsDom = document.getElementById('tips');
+                disPatchdataDom = document.getElementById('dispatchdata');
+                initListeners();
+            }
+            
+            function initListeners() {
+                document.getElementById('btn_connect').addEventListener('click', function() {
+                    !socket && connectSocket();
+                });
+                
+                document.getElementById('btn_disconnect').addEventListener('click', function() {
+                    closeSocket();
+                });
+                
+                document.getElementById('btn_dispatch').addEventListener('click', function() {
+                    var message = disPatchdataDom.value;
+                    
+                    socket.emit('dispatch data', {
+                        message: message,
+                    }, function(data) {
+                        if (data.code) {
+                            showMessage('分发成功:' + data.message);
+                        } else {
+                            showMessage('分发失败:' + data.message);
+                        }
+                    });
+                });
+                
+            }
+            
+            function connectSocket() {
+                socket = io.connect('http://localhost:8100');
+
+                socket.on('open', function(data) {
+                    showMessage('已经连接到服务器，连接时间：' + data.time);
+                    createRoom(roomId);
+                });
+
+                socket.on('client created', function(data) {
+                    showMessage(data.time + '客户端' + data.clientId + '加入，客户端数：' + data.clientCount);
+                });
+                
+                socket.on('client destroy', function(data) {
+                    showMessage(data.time + '客户端' + data.clientId + '退出，客户端数：' + data.clientCount);
+                });
+                
+
+                socket.on('disconnect', () => {
+                    // 失联
+                    socket = undefined;
+                    showMessage('和服务端失去联系');
+                });
+            }
+            
+            function createRoom(roomId) {
+                // 创建房间，如果不符合要求需要提示错误
+                socket.emit('create room', roomId, function(data) {
+                    if (data.code) {
+                        showMessage(roomId + '创建成功');
+                    } else {
+                        showMessage(roomId + '创建失败：' + data.message);
+                        closeSocket();
+                    }
+                });
+            }
+            
+            function closeSocket() {
+                socket && socket.close();
+                // socket.disconnect();
+            }
+            
+            function showMessage(msg, isClear) {
+                var html = '<li>' + msg + '</li>';
+                
+                if (isClear) {
+                    tipsDom.innerHTML = html;
+                } else {
+                    tipsDom.innerHTML += html;
+                }
+                
+                console.log(msg);
+            }
+            
+            function tips(msg) {
+                alert(msg);
+            }
+            
+            init();
+        </script>
+    </body>
+
+</html>
