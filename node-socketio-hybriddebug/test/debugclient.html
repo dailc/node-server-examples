@@ -26,6 +26,12 @@
         <script type="text/javascript" src="socket.io.js"></script>
         <script type="text/javascript" src="common.js"></script>
         <script>
+            if (Util.getExtraDataByKey('isdebug') == '1' || Util.getExtraDataByKey('isdebug') == 'true') {
+                // ==
+                document.writeln('<script src="' + './vconsole.min.js' + '"></sc' + 'ript>');
+            }
+        </script>
+        <script>
             var socket;
             var tipsDom = document.getElementById('tips');
             var statusDom = document.getElementById('status');
@@ -45,7 +51,7 @@
             }
 
             function connectSocket() {
-                socket = io.connect('http://localhost:8100');
+                socket = io.connect('http://'+ window.location.hostname + ':8100');
 
                 socket.on('open', function(data) {
                     statusDom.innerText = data.time + '连接成功';

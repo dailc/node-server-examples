@@ -13,8 +13,7 @@
             #code {
                 float: left;
                 min-height: 1px;
-                padding-right: 15px;
-                padding-left: 15px;
+                padding: 15px;
             }
             
             #clients-info {
@@ -35,7 +34,7 @@
                     <h5>Hybrid容器扫码加载</h5>
                 </div>
                 <div class="panel-body">
-                    <div id="code" class="mui-col-xs-3"><canvas width="260" height="260"></canvas></div>
+                    <div id="code" class="mui-col-xs-3"></div>
                     <div id="clients-info" class="mui-col-xs-9"></div>
                     <button id="btn-pull" class="mui-btn mui-btn-block">拉取数据</button>
                     <button id="btn-save" class="mui-btn mui-btn-block">保存数据</button>
@@ -66,19 +65,29 @@ alert('hello world!');
             </div>
 
         </div>
-
+        
         <script type="text/javascript" src="socket.io.js"></script>
+        <script type="text/javascript" src="qrcode.js" ></script>
         <script type="text/javascript" src="mui/mui.js"></script>
         <script type="text/javascript" src="codemirror/codemirror.js"></script>
         <script type="text/javascript" src="codemirror/mode/javascript.js"></script>
         <script type="text/javascript" src="common.js"></script>
         <script>
+            var CLIENT_ADDRESS = 'debugclient.html';
             var socket;
             var clientInfoDom = document.getElementById('clients-info');
             var tipsDom = document.getElementById('tips');
             var statusDom = document.getElementById('status');
             var codeJs;
             var roomId = Util.getExtraDataByKey('roomid') || Util.uuid();
+            var qrcode = new QRCode(document.getElementById("code"), {
+                width: 260,
+                height: 260,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                // L M Q H
+                correctLevel : QRCode.CorrectLevel.H,
+            });
 
             function init() {
                 codeJs = CodeMirror.fromTextArea(document.getElementById("testcodejs"), {
@@ -95,14 +104,21 @@ alert('hello world!');
                 var url = window.location.href;
                 
                 // 替换为对于的页面
-                url = url.replace(/[^/]+[.]html/, 'debugclient.html');
+                url = url.replace(/[^/]+[.]html/, CLIENT_ADDRESS);
+                url = url.replace(/roomid[=][^=&]*&/, '');
+                url += /[?]/.test(url) ? ('&roomid=' + roomId) : ('?roomid=' + roomId);
+                
+                qrcode.makeCode(url);
                 
                 var html = '<li class="list-group-item"><a href="' + url + '">' + url + '</a></li>';
                 
-                clientInfoDom.innerHTML += html;
+                showMessage('客户端地址：' + html, true);
             }
 
             function initListeners() {
+                mui('#clients-info').on('tap', 'a', function() {
+                    window.open(this.getAttribute('href'));
+                });
                 mui('.panel-body').on('tap', '#btn-save', function() {
                     save();
                 });
@@ -129,15 +145,15 @@ alert('hello world!');
             function dispatchData(data) {
                 socket.emit('dispatch data', data, function(data) {
                     if (data.code) {
-                        showMessage('执行成功:' + data.message);
+                        showMessage('分发成功:' + data.message);
                     } else {
-                        showMessage('执行失败:' + data.message);
+                        showMessage('分发失败:' + data.message);
                     }
                 });
             }
 
             function connectSocket() {
-                socket = io.connect('http://localhost:8100');
+                socket = io.connect('http://'+ window.location.hostname + ':8100');
 
                 socket.on('open', function(data) {
                     statusDom.innerText = data.time + '连接成功';
