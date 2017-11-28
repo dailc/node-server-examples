@@ -36,9 +36,10 @@
                 <div class="panel-body">
                     <div id="code" class="mui-col-xs-3"></div>
                     <div id="clients-info" class="mui-col-xs-9"></div>
-                    <button id="btn-pull" class="mui-btn mui-btn-block">拉取数据</button>
-                    <button id="btn-save" class="mui-btn mui-btn-block">保存数据</button>
-                    <button id="btn-reload" class="mui-btn mui-btn-block">重载页面</button>
+                    <button id="btn-pull" class="mui-btn mui-btn-block hidden">拉取数据</button>
+                   <button id="btn-save" class="mui-btn mui-btn-block">缓存数据</button>
+                    <button id="btn-clearcache" class="mui-btn mui-btn-block">清除缓存</button>
+                    <button id="btn-reload" class="mui-btn mui-btn-block hidden">重载页面</button>
                 </div>
             </div>
 
@@ -95,6 +96,7 @@ alert('hello world!');
                     //实现代码高亮
                     mode: "javascript"
                 });
+                pull();
                 generateQRCode();
                 initListeners();
                 connectSocket();
@@ -124,6 +126,10 @@ alert('hello world!');
                 });
                 mui('.panel-body').on('tap', '#btn-pull', function() {
                     pull();
+                });
+                mui('.panel-body').on('tap', '#btn-clearcache', function() {
+                    localStorage.clear();
+                    alert('清除缓存成功');
                 });
                 mui('.panel-body').on('tap', '#btn-reload', function() {
                     reload();
@@ -225,7 +231,7 @@ alert('hello world!');
             }
 
             function pull() {
-                var js = localStorage.getItem('ejs3_key_validate_code');
+                var js = localStorage.getItem('ejs3_key_validate_code') || codeJs.getValue();
 
                 codeJs.setValue(js);
 
